@@ -1,12 +1,18 @@
 package lipgloss
 
 import (
+	"os"
 	"strings"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/rivo/uniseg"
 )
 
-const marker = '\x1B'
+const (
+	marker = '\x1B'
+
+	ttydTerminal = "ttyd"
+)
 
 // GetBold returns the style's bold value. If no value is set false is returned.
 func (s Style) GetBold() bool {
@@ -522,7 +528,12 @@ func PrintableStringWidth(s string) int {
 		}
 	}
 
-	return runewidth.StringWidth(string(sr))
+	switch os.Getenv("LIPGLOSS_TERMINAL") {
+	case ttydTerminal:
+		return uniseg.GraphemeClusterCount(string(sr))
+	default:
+		return runewidth.StringWidth(string(sr))
+	}
 }
 
 func isTerminator(c rune) bool {
