@@ -9,9 +9,11 @@ import (
 )
 
 const (
-	marker = '\x1B'
+	marker  = '\x1B'
+	variant = "\U0000FE0F"
 
-	ttydTerminal = "ttyd"
+	ttydTerminal  = "ttyd"
+	kittyTerminal = "kitty"
 )
 
 // GetBold returns the style's bold value. If no value is set false is returned.
@@ -531,6 +533,15 @@ func PrintableStringWidth(s string) int {
 	switch os.Getenv("LIPGLOSS_TERMINAL") {
 	case ttydTerminal:
 		return uniseg.GraphemeClusterCount(string(sr))
+	case kittyTerminal:
+		variants := strings.Count(string(sr), variant)
+		strwidth := runewidth.StringWidth(string(sr))
+
+		if variants > 0 && strwidth == len(sr) {
+			return strwidth
+		}
+
+		return strwidth + variants
 	default:
 		return runewidth.StringWidth(string(sr))
 	}
